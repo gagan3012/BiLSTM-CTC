@@ -1,7 +1,6 @@
 _target_: src.datamodules.arocr_datamodule.ArocrDataModule
 data_dir: ${paths.data_dir}
 dataset_name: OnlineKhatt
-cache_dir: ${paths.cache_dir}
 batch_size: 128
 num_workers: 0
 pin_memory: False

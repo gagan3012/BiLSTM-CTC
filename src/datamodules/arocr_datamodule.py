@@ -84,9 +84,10 @@ class ArocrDataModule(LightningDataModule):
             # dataset = datasets.load_dataset(self.hparams.data_dir,self.hparams.dataset_name,cache_dir=self.hparams.cache_dir)
             dataset = datasets.load_dataset("gagan3012/OnlineKhatt")
             # split dataset
-            self.data_train = pd.DataFrame(dataset['train'])
-            self.data_val = pd.DataFrame(dataset['dev'])
-            self.data_test = pd.DataFrame(dataset['test'])
+            self.data_train = dataset['train']
+            # self.data_val = pd.DataFrame(dataset['validation'])
+            self.data_val = dataset['dev']
+            self.data_test = dataset['test']
 
     def train_dataloader(self):
         return DataLoader(

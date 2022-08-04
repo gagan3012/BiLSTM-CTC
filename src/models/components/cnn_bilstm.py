@@ -13,7 +13,6 @@ class CNN_BiLSTM(nn.Module):
             nn.LSTM(32*2, 32, bidirectional=True),
             nn.Linear(32*2, 10),
             nn.Linear(10, 10),
-            
         )
     
     def forward(self, x):

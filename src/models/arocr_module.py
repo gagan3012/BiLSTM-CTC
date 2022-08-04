@@ -36,7 +36,9 @@ class ArocrLitModule(LightningModule):
         self.net = net
 
         # loss function
-        self.criterion = torch.nn.CrossEntropyLoss()
+        self.criterion = torch.nn.CTCLoss(
+            blank=0, reduction="mean", zero_infinity=True
+        )
 
         # use separate metric instance for train, val and test step
         # to ensure a proper reduction over the epoch

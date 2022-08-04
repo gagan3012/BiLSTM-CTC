@@ -3,11 +3,12 @@ from typing import Any, Dict, Optional, Tuple
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import ConcatDataset, DataLoader, Dataset, random_split
-from torchvision.datasets import MNIST
+import datasets
 from torchvision.transforms import transforms
+import pandas as pd
 
 
-class MNISTDataModule(LightningDataModule):
+class ArocrDataModule(LightningDataModule):
     """Example of LightningDataModule for MNIST dataset.
 
     A DataModule implements 5 key methods:
@@ -38,7 +39,8 @@ class MNISTDataModule(LightningDataModule):
     def __init__(
         self,
         data_dir: str = "data/",
-        train_val_test_split: Tuple[int, int, int] = (55_000, 5_000, 10_000),
+        dataset_name: str = "OnlineKhatt",
+        cache_dir: str = "data/cache/",
         batch_size: int = 64,
         num_workers: int = 0,
         pin_memory: bool = False,
@@ -67,8 +69,8 @@ class MNISTDataModule(LightningDataModule):
 
         Do not use it to assign state (self.x = y).
         """
-        MNIST(self.hparams.data_dir, train=True, download=True)
-        MNIST(self.hparams.data_dir, train=False, download=True)
+        # datasets.load_dataset(self.hparams.data_dir,self.hparams.dataset_name,cache_dir=self.hparams.cache_dir)
+        datasets.load_dataset("gagan3012/OnlineKhatt")
 
     def setup(self, stage: Optional[str] = None):
         """Load data. Set variables: `self.data_train`, `self.data_val`, `self.data_test`.
@@ -78,14 +80,13 @@ class MNISTDataModule(LightningDataModule):
         """
         # load and split datasets only if not loaded already
         if not self.data_train and not self.data_val and not self.data_test:
-            trainset = MNIST(self.hparams.data_dir, train=True, transform=self.transforms)
-            testset = MNIST(self.hparams.data_dir, train=False, transform=self.transforms)
-            dataset = ConcatDataset(datasets=[trainset, testset])
-            self.data_train, self.data_val, self.data_test = random_split(
-                dataset=dataset,
-                lengths=self.hparams.train_val_test_split,
-                generator=torch.Generator().manual_seed(42),
-            )
+            # load dataset
+            # dataset = datasets.load_dataset(self.hparams.data_dir,self.hparams.dataset_name,cache_dir=self.hparams.cache_dir)
+            dataset = datasets.load_dataset("gagan3012/OnlineKhatt")
+            # split dataset
+            self.data_train = pd.DataFrame(dataset['train'])
+            self.data_val = pd.DataFrame(dataset['validation'])
+            self.data_test = pd.DataFrame(dataset['test'])
 
     def train_dataloader(self):
         return DataLoader(
@@ -133,6 +134,10 @@ if __name__ == "__main__":
     import pyrootutils
 
     root = pyrootutils.setup_root(__file__, pythonpath=True)
-    cfg = omegaconf.OmegaConf.load(root / "configs" / "datamodule" / "mnist.yaml")
+    cfg = omegaconf.OmegaConf.load(root / "configs" / "datamodule" / "arocr.yaml")
     cfg.data_dir = str(root / "data")
-    _ = hydra.utils.instantiate(cfg)
+    cfg.cache_dir = str(root / "data" / "cache")
+    dm = hydra.utils.instantiate(cfg)
+    dm.prepare_data()   
+    dm.setup("fit")
+    print(next(iter(dm.train_dataloader())))

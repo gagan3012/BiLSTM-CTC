@@ -3,11 +3,12 @@ from typing import Any, List
 import torch
 from pytorch_lightning import LightningModule
 from torchmetrics import MaxMetric
-from torchmetrics.classification.accuracy import Accuracy
+from torchmetrics import WordErrorRate
+from torchmetrics import CharErrorRate
 
 
-class MNISTLitModule(LightningModule):
-    """Example of LightningModule for MNIST classification.
+class ArocrLitModule(LightningModule):
+    """Example of LightningModule 
 
     A LightningModule organizes your PyTorch code into 6 sections:
         - Computations (init).
@@ -39,10 +40,13 @@ class MNISTLitModule(LightningModule):
 
         # use separate metric instance for train, val and test step
         # to ensure a proper reduction over the epoch
-        self.train_acc = Accuracy()
-        self.val_acc = Accuracy()
-        self.test_acc = Accuracy()
-
+        self.train_cer = CharErrorRate()
+        self.val_cer = CharErrorRate()
+        self.test_cer = CharErrorRate()
+        self.train_wer = WordErrorRate()
+        self.val_wer = WordErrorRate()
+        self.test_wer = WordErrorRate()
+    
         # for logging best so far validation accuracy
         self.val_acc_best = MaxMetric()
 
@@ -65,9 +69,11 @@ class MNISTLitModule(LightningModule):
         loss, preds, targets = self.step(batch)
 
         # log train metrics
-        acc = self.train_acc(preds, targets)
+        cer = self.train_cer(preds, targets)
+        wer = self.train_wer(preds, targets)
         self.log("train/loss", loss, on_step=False, on_epoch=True, prog_bar=False)
-        self.log("train/acc", acc, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("train/cer", cer, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("train/wer", wer, on_step=False, on_epoch=True, prog_bar=True)
 
         # we can return here dict with any tensors
         # and then read it in some callback or in `training_epoch_end()` below
@@ -76,36 +82,43 @@ class MNISTLitModule(LightningModule):
 
     def training_epoch_end(self, outputs: List[Any]):
         # `outputs` is a list of dicts returned from `training_step()`
-        self.train_acc.reset()
+        self.train_cer.reset()
+        self.train_wer.reset()
 
     def validation_step(self, batch: Any, batch_idx: int):
         loss, preds, targets = self.step(batch)
 
         # log val metrics
-        acc = self.val_acc(preds, targets)
+        cer = self.val_cer(preds, targets)
+        wer = self.val_wer(preds, targets)
         self.log("val/loss", loss, on_step=False, on_epoch=True, prog_bar=False)
-        self.log("val/acc", acc, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("val/cer", cer, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("val/wer", wer, on_step=False, on_epoch=True, prog_bar=True)
 
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def validation_epoch_end(self, outputs: List[Any]):
-        acc = self.val_acc.compute()  # get val accuracy from current epoch
+        acc = self.val_cer.compute()  # get val accuracy from current epoch
         self.val_acc_best.update(acc)
-        self.log("val/acc_best", self.val_acc_best.compute(), on_epoch=True, prog_bar=True)
-        self.val_acc.reset()
+        self.log("val/cer_best", self.val_acc_best.compute(), on_epoch=True, prog_bar=True)
+        self.val_cer.reset()
+        self.val_wer.reset()
 
     def test_step(self, batch: Any, batch_idx: int):
         loss, preds, targets = self.step(batch)
 
         # log test metrics
-        acc = self.test_acc(preds, targets)
+        cer = self.test_cer(preds, targets)
+        wer = self.test_wer(preds, targets)
         self.log("test/loss", loss, on_step=False, on_epoch=True)
-        self.log("test/acc", acc, on_step=False, on_epoch=True)
+        self.log("test/cer", cer, on_step=False, on_epoch=True)
+        self.log("test/wer", wer, on_step=False, on_epoch=True)
 
         return {"loss": loss, "preds": preds, "targets": targets}
 
     def test_epoch_end(self, outputs: List[Any]):
-        self.test_acc.reset()
+        self.test_cer.reset()
+        self.test_wer.reset()
 
     def configure_optimizers(self):
         """Choose what optimizers and learning-rate schedulers to use in your optimization.
@@ -125,5 +138,5 @@ if __name__ == "__main__":
     import pyrootutils
 
     root = pyrootutils.setup_root(__file__, pythonpath=True)
-    cfg = omegaconf.OmegaConf.load(root / "configs" / "model" / "mnist.yaml")
+    cfg = omegaconf.OmegaConf.load(root / "configs" / "model" / "arocr.yaml")
     _ = hydra.utils.instantiate(cfg)

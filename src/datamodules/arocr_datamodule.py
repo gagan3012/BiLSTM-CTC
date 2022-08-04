@@ -1,11 +1,11 @@
 from typing import Any, Dict, Optional, Tuple
 
+import datasets
+import pandas as pd
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import ConcatDataset, DataLoader, Dataset, random_split
-import datasets
 from torchvision.transforms import transforms
-import pandas as pd
 
 
 class ArocrDataModule(LightningDataModule):
@@ -84,9 +84,9 @@ class ArocrDataModule(LightningDataModule):
             # dataset = datasets.load_dataset(self.hparams.data_dir,self.hparams.dataset_name,cache_dir=self.hparams.cache_dir)
             dataset = datasets.load_dataset("gagan3012/OnlineKhatt")
             # split dataset
-            self.data_train = pd.DataFrame(dataset['train'])
-            self.data_val = pd.DataFrame(dataset['validation'])
-            self.data_test = pd.DataFrame(dataset['test'])
+            self.data_train = pd.DataFrame(dataset["train"])
+            self.data_val = pd.DataFrame(dataset["validation"])
+            self.data_test = pd.DataFrame(dataset["test"])
 
     def train_dataloader(self):
         return DataLoader(
@@ -138,6 +138,6 @@ if __name__ == "__main__":
     cfg.data_dir = str(root / "data")
     cfg.cache_dir = str(root / "data" / "cache")
     dm = hydra.utils.instantiate(cfg)
-    dm.prepare_data()   
+    dm.prepare_data()
     dm.setup("fit")
     print(next(iter(dm.train_dataloader())))

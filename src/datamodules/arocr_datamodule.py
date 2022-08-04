@@ -90,7 +90,7 @@ class ArocrDataModule(LightningDataModule):
             # dataset = datasets.load_dataset(self.hparams.data_dir,self.hparams.dataset_name,cache_dir=self.hparams.cache_dir)
             dataset = datasets.load_dataset("gagan3012/OnlineKhatt")
             dataset = dataset.map(preprocess, batched=True, remove_columns=['image'])
-            dataset = dataset.set_format(type="torch", columns=['pixel_values','text'])
+            dataset = dataset.set_format(type="torch")
             # split dataset
             self.data_train = dataset['train']
             # self.data_val = pd.DataFrame(dataset['validation'])

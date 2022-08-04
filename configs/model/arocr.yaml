@@ -7,7 +7,7 @@ optimizer:
   weight_decay: 0.0
 
 net:
-  _target_: src.models.components.simple_dense_net.SimpleDenseNet
+  _target_: src.models.components.cnn_bilstm.CNN_BiLSTM
   input_size: 784
   lin1_size: 64
   lin2_size: 128

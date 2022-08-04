@@ -6,6 +6,12 @@ from torch.utils.data import ConcatDataset, DataLoader, Dataset, random_split
 import datasets
 from torchvision.transforms import transforms
 import pandas as pd
+import numpy as np
+
+def preprocess(examples):
+    # preprocess the data
+    examples["pixel_values"] = [np.asarray(image.convert("RGB")) for image in examples["image"]]
+    return examples
 
 
 class ArocrDataModule(LightningDataModule):
@@ -83,6 +89,7 @@ class ArocrDataModule(LightningDataModule):
             # load dataset
             # dataset = datasets.load_dataset(self.hparams.data_dir,self.hparams.dataset_name,cache_dir=self.hparams.cache_dir)
             dataset = datasets.load_dataset("gagan3012/OnlineKhatt")
+            dataset = dataset.map(preprocess, batched=True, remove_columns=['image'])
             # split dataset
             self.data_train = dataset['train']
             # self.data_val = pd.DataFrame(dataset['validation'])

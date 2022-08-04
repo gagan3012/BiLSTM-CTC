@@ -104,6 +104,7 @@ class ArocrDataModule(LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=True,
+            collate_fn=lambda x: x,
         )
 
     def val_dataloader(self):
@@ -113,6 +114,7 @@ class ArocrDataModule(LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,
+            collate_fn=lambda x: x,
         )
 
     def test_dataloader(self):
@@ -122,6 +124,7 @@ class ArocrDataModule(LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,
+            collate_fn=lambda x: x,
         )
 
     def teardown(self, stage: Optional[str] = None):

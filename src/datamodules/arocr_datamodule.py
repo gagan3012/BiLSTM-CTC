@@ -10,7 +10,7 @@ import numpy as np
 
 def preprocess(examples):
     # preprocess the data
-    examples["pixel_values"] = [np.asarray(image.convert("RGB").resize((300,300))) for image in examples["image"]]
+    examples["pixel_values"] = np.asarray(examples["image"].convert("RGB").resize((300,300)))
     return examples
 
 

@@ -61,9 +61,7 @@ class ArocrLitModule(LightningModule):
         self.val_acc_best.reset()
 
     def step(self, batch: Any):
-        print(batch)
         x, y = batch
-        print(x.shape)
         logits = self.forward(x)
         loss = self.criterion(logits, y)
         preds = torch.argmax(logits, dim=1)

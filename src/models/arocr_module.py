@@ -61,6 +61,7 @@ class ArocrLitModule(LightningModule):
         self.val_acc_best.reset()
 
     def step(self, batch: Any):
+        print(batch)
         for k,v in batch.items():
             batch[k] = v.to(self.device)
             y = v.to(self.device)

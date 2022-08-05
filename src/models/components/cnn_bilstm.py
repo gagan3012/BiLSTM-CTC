@@ -14,6 +14,7 @@ class CNN_BiLSTM(nn.Module):
             nn.Linear(32*2, 10),
             nn.Linear(10, 10),
         )
+        
     
     def forward(self, x):
         batch_size, channels, width, height = x.size()

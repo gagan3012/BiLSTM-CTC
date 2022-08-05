@@ -1,5 +1,5 @@
 from typing import Any, Dict, Optional, Tuple
-
+from transformers import TrOCRProcessor
 import torch
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import ConcatDataset, DataLoader, Dataset, random_split
@@ -8,10 +8,17 @@ from torchvision.transforms import transforms
 import pandas as pd
 import numpy as np
 
-def preprocess(examples):
-    # preprocess the data
-    examples["pixel_values"] = [np.asarray(image.convert("RGB").resize((300,300))) for image in examples["image"]]
-    return examples
+def preprocess(examples, processor, max_target_length=128):
+    text = examples["text"]
+    image = examples["image"].convert("RGB")
+    pixel_values = processor(image, return_tensors="pt").pixel_values
+    labels = processor.tokenizer(
+        text, padding="max_length", max_length=max_target_length
+    ).input_ids
+    labels = [label if label != processor.tokenizer.pad_token_id else -100 for label in labels]
+    encoding = {"pixel_values": pixel_values.squeeze(), "labels": torch.tensor(labels)}
+    return encoding
+
 
 
 class ArocrDataModule(LightningDataModule):
@@ -77,7 +84,7 @@ class ArocrDataModule(LightningDataModule):
         """
         # datasets.load_dataset(self.hparams.data_dir,self.hparams.dataset_name,cache_dir=self.hparams.cache_dir)
         datasets.load_dataset("gagan3012/OnlineKhatt")
-
+        TrOCRProcessor.from_pretrained("microsoft/trocr-base-handwritten")
     def setup(self, stage: Optional[str] = None):
         """Load data. Set variables: `self.data_train`, `self.data_val`, `self.data_test`.
 
@@ -89,7 +96,11 @@ class ArocrDataModule(LightningDataModule):
             # load dataset
             # dataset = datasets.load_dataset(self.hparams.data_dir,self.hparams.dataset_name,cache_dir=self.hparams.cache_dir)
             dataset = datasets.load_dataset("gagan3012/OnlineKhatt")
-            dataset = dataset.map(preprocess, batched=True, remove_columns=['image'])
+            processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-handwritten")
+            fn_kwargs = dict(
+                processor = processor,
+            )
+            dataset = dataset.map(preprocess, fn_kwargs=fn_kwargs)
             # split dataset
             self.data_train = dataset['train']
             # self.data_val = pd.DataFrame(dataset['validation'])

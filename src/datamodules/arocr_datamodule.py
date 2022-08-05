@@ -160,3 +160,6 @@ if __name__ == "__main__":
     cfg.data_dir = str(root / "data")
     cfg.cache_dir = str(root / "data" / "cache")
     dm = hydra.utils.instantiate(cfg)
+    dm.prepare_data()
+    dm.setup('fit')
+    print(next(iter(dm.train_dataloader())))

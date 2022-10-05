@@ -1,21 +1,21 @@
 from torch import nn
 
+
 class CNN_BiLSTM(nn.Module):
     def __init__(self):
         super().__init__()
 
         self.cnn = nn.Sequential(
-            nn.Conv2d(1, 8, kernel_size=(5,9), stride=1, padding=1),
-            nn.Conv2d(8, 8, kernel_size=(5,7), stride=1, padding=1),
+            nn.Conv2d(1, 8, kernel_size=(5, 9), stride=1, padding=1),
+            nn.Conv2d(8, 8, kernel_size=(5, 7), stride=1, padding=1),
             nn.LSTM(8, 32, bidirectional=True),
-            nn.LSTM(32*2, 32, bidirectional=True),
-            nn.LSTM(32*2, 32, bidirectional=True),
-            nn.LSTM(32*2, 32, bidirectional=True),
-            nn.Linear(32*2, 10),
+            nn.LSTM(32 * 2, 32, bidirectional=True),
+            nn.LSTM(32 * 2, 32, bidirectional=True),
+            nn.LSTM(32 * 2, 32, bidirectional=True),
+            nn.Linear(32 * 2, 10),
             nn.Linear(10, 10),
         )
-        
-    
+
     def forward(self, x):
         batch_size, channels, width, height = x.size()
 

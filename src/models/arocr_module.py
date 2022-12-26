@@ -2,13 +2,11 @@ from typing import Any, List
 
 import torch
 from pytorch_lightning import LightningModule
-from torchmetrics import MaxMetric
-from torchmetrics import WordErrorRate
-from torchmetrics import CharErrorRate
+from torchmetrics import CharErrorRate, MaxMetric, WordErrorRate
 
 
 class ArocrLitModule(LightningModule):
-    """Example of LightningModule 
+    """Example of LightningModule.
 
     A LightningModule organizes your PyTorch code into 6 sections:
         - Computations (init).
@@ -36,9 +34,7 @@ class ArocrLitModule(LightningModule):
         self.net = net
 
         # loss function
-        self.criterion = torch.nn.CTCLoss(
-            blank=0, reduction="mean", zero_infinity=True
-        )
+        self.criterion = torch.nn.CTCLoss(blank=0, reduction="mean", zero_infinity=True)
 
         # use separate metric instance for train, val and test step
         # to ensure a proper reduction over the epoch
@@ -48,7 +44,7 @@ class ArocrLitModule(LightningModule):
         self.train_wer = WordErrorRate()
         self.val_wer = WordErrorRate()
         self.test_wer = WordErrorRate()
-    
+
         # for logging best so far validation accuracy
         self.val_acc_best = MaxMetric()
 
@@ -62,7 +58,7 @@ class ArocrLitModule(LightningModule):
 
     def step(self, batch: Any):
         print(batch)
-        for k,v in batch.items():
+        for k, v in batch.items():
             batch[k] = v.to(self.device)
             y = v.to(self.device)
 

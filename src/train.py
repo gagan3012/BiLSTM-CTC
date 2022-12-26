@@ -16,7 +16,6 @@ root = pyrootutils.setup_root(__file__, dotenv=True, pythonpath=True)
 
 @hydra.main(version_base="1.2", config_path=root / "configs", config_name="train.yaml")
 def main(cfg: DictConfig) -> float:
-
     # imports can be nested inside @hydra.main to optimize tab completion
     # https://github.com/facebookresearch/hydra/issues/934
     from src.tasks.train_task import train
